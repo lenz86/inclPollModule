@@ -81,21 +81,15 @@ public class Controller implements Initializable {
     void scanClick(MouseEvent event) {
 
         /*CONNECT TO COM AND SEARCHING SENSORS*/
-        try {
-            String port = comBox.getValue();
-            if (serialPort == null) {
-                serialPort = new SerialPort(port);
-            }
-            if (!serialPort.isOpened()) {
-                serialPort.openPort();
-                serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-            }
-            serialPort.closePort();
-        } catch (SerialPortException e) {
-            e.printStackTrace();
+        String port = comBox.getValue();
+        if (serialPort == null) {
+            serialPort = new SerialPort(port);
         }
-        new SensorScan().start();
+        if (!serialPort.isOpened()) {
+            new SensorScan().start();
+        }
     }
+
 
     @FXML
     void selectedItem(MouseEvent event) {
@@ -104,6 +98,7 @@ public class Controller implements Initializable {
             int pollingRate = 1000;
             SerialPort serialPort = new SerialPort(port);
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
+            sensorLine.open();
             SensorList sensorList = sensorLine.inclFactory(addresses, port);
             comPorts.add(sensorList);
             HashSet<Incl> sensorList2 = sensorList.getSensors();
@@ -120,6 +115,7 @@ public class Controller implements Initializable {
                     }
                 }
             }
+            sensorLine.close();
         }
     }
 
@@ -167,6 +163,7 @@ public class Controller implements Initializable {
             String port = comBox.getValue();
             int pollingRate = 100;
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
+            sensorLine.open();
             progBar.setProgress(0);
             sensorLine.start();
             for (int i = 0; i < 64; i++) {
@@ -186,6 +183,7 @@ public class Controller implements Initializable {
             if (addresses.size() > 0 && !list1.getItems().contains(port)) {
                 list1.getItems().add(port);
             }
+            sensorLine.close();
         }
     }
 
@@ -197,6 +195,7 @@ public class Controller implements Initializable {
             int pollingRate = 100;
             int pollCount = 0;
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
+            sensorLine.open();
             while (!this.isInterrupted()) {
                 for (Incl sensor : sensors) {
                     String[] tmp = sensorLine.readValues(ProtocolVersion.VERSION_2_11, Integer.parseInt(sensor.getAddress()));
@@ -223,12 +222,8 @@ public class Controller implements Initializable {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    sensorLine.close();
                     this.interrupt();
-                    try {
-                        serialPort.closePort();
-                    } catch (SerialPortException ex) {
-                        ex.printStackTrace();
-                    }
                 }
                 System.out.println("Конец цикла опроса датчиков");
             }

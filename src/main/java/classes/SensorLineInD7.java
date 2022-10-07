@@ -61,8 +61,6 @@ public class SensorLineInD7 extends Thread {
 
     public void pingSensors() {
         try {
-            serialPort.openPort();
-            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);  //Доделать параметры
             PortReader portReader = new PortReader(serialPort);
             serialPort.addEventListener(portReader, SerialPort.MASK_RXCHAR);
             for (int address = startAddress; address <= endAddress; address++) {
@@ -78,7 +76,6 @@ public class SensorLineInD7 extends Thread {
                     } else System.out.println("Another data! " + data);  //Доделать
                 }
             }
-            serialPort.closePort();
         } catch (SerialPortException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -98,8 +95,6 @@ public class SensorLineInD7 extends Thread {
     public String readVersion(int address) {
         String version = "";
         try {
-            serialPort.openPort();
-            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);  //Доделать параметры
             PortReader portReader = new PortReader(serialPort);
             serialPort.addEventListener(portReader, SerialPort.MASK_RXCHAR);
             int[] command = READ_VERSION;
@@ -110,7 +105,7 @@ public class SensorLineInD7 extends Thread {
                 String data = portReader.readData();
                 version = PackageHandler.pullVersion(data);                   //Отправлять в парсер пакетов
             }
-            serialPort.closePort();
+            serialPort.removeEventListener();
         } catch (SerialPortException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -120,8 +115,6 @@ public class SensorLineInD7 extends Thread {
     public String readFactoryID(int address) {
         String factoryID = "";
         try {
-            serialPort.openPort();
-            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);  //Доделать параметры
             PortReader portReader = new PortReader(serialPort);
             serialPort.addEventListener(portReader, SerialPort.MASK_RXCHAR);
             int[] command = READ_FACTORY_ID;
@@ -132,7 +125,7 @@ public class SensorLineInD7 extends Thread {
                     String data = portReader.readData();
                 factoryID = PackageHandler.pullFactoryId(data);                    //Отправлять в парсер пакетов
             }
-            serialPort.closePort();
+            serialPort.removeEventListener();
         } catch (SerialPortException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -142,8 +135,6 @@ public class SensorLineInD7 extends Thread {
     public String[] readValues(ProtocolVersion version, int address) {
         String[] values = new String[2];
         try {
-            serialPort.openPort();
-            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
             PortReader portReader = new PortReader(serialPort);
             serialPort.addEventListener(portReader, SerialPort.MASK_RXCHAR);
             switch (version) {
@@ -164,7 +155,7 @@ public class SensorLineInD7 extends Thread {
                 String data = portReader.readData();
                 values = PackageHandler.pullValues(data); //Отправлять в парсер пакетов
             }
-            serialPort.closePort();
+            serialPort.removeEventListener();
         } catch (SerialPortException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -180,10 +171,23 @@ public class SensorLineInD7 extends Thread {
     }
 
     public void close() {
-        try {
-            serialPort.closePort();
-        } catch (SerialPortException e) {
-            e.printStackTrace();
+        if (serialPort.isOpened()) {
+            try {
+                serialPort.closePort();
+            } catch (SerialPortException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void open() {
+        if (!serialPort.isOpened()) {
+            try {
+                serialPort.openPort();
+                serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            } catch (SerialPortException e) {
+                e.printStackTrace();
+            }
         }
     }
 
