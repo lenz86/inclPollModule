@@ -1,6 +1,9 @@
 package sample;
 
 import classes.*;
+import classes.websocket.ConnectWS;
+import classes.websocket.DataToTransfer;
+import classes.websocket.MyWebSocketClient;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +17,7 @@ import jssc.SerialPortList;
 
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class Controller implements Initializable {
 
@@ -63,6 +67,7 @@ public class Controller implements Initializable {
     private HashMap<Long, String> idFromDB;
     private SensorPoll sensorPoll;
     private SerialPort serialPort;
+    private MyWebSocketClient myWebSocketClient;
 
 
     @FXML
@@ -74,6 +79,8 @@ public class Controller implements Initializable {
 
     @FXML
     void scanClick(MouseEvent event) {
+
+        /*CONNECT TO COM AND SEARCHING SENSORS*/
         try {
             String port = comBox.getValue();
             if (serialPort == null) {
@@ -121,6 +128,12 @@ public class Controller implements Initializable {
         if (!(sensorPoll == null) && !sensorPoll.isInterrupted()) {
             sensorPoll.interrupt();
         }
+        /*CONNECT TO WEB SOCKET*/
+        try {
+            myWebSocketClient = ConnectWS.createClientConnection();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
         sensorPoll = new SensorPoll();
         sensorPoll.start();
     }
@@ -128,7 +141,6 @@ public class Controller implements Initializable {
     @FXML
     void stopBtnClick(MouseEvent event) {
         sensorPoll.interrupt();
-//        sensorPoll.interrupt();
     }
 
     @Override
@@ -154,7 +166,6 @@ public class Controller implements Initializable {
             log.appendText("Search for sensors... \n");
             String port = comBox.getValue();
             int pollingRate = 100;
-//            SerialPort serialPort = new SerialPort(port);
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
             progBar.setProgress(0);
             sensorLine.start();
@@ -184,15 +195,29 @@ public class Controller implements Initializable {
         public void run() {
             String port = list1.getSelectionModel().getSelectedItem();
             int pollingRate = 100;
-//            serialPort = new SerialPort(port);
+            int pollCount = 0;
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
             while (!this.isInterrupted()) {
                 for (Incl sensor : sensors) {
                     String[] tmp = sensorLine.readValues(ProtocolVersion.VERSION_2_11, Integer.parseInt(sensor.getAddress()));
                     sensor.setAxisX(tmp[0]);
                     sensor.setAxisY(tmp[1]);
-                    DBWorker.setValuesIntoDB(sensor.getIdFromDB(), sensor.getAxisX(), sensor.getAxisY());
+                    //Write into DB every 10th poll
+                    if (pollCount == 10) {
+                        DBWorker.setValuesIntoDB(sensor.getIdFromDB(), sensor.getAxisX(), sensor.getAxisY());
+                    }
                 }
+                if (pollCount < 10) {
+                    pollCount++;
+                } else {
+                    pollCount = 0;
+                }
+                //Create data-object from 'sensors' array with current values
+                DataToTransfer dataToTransfer = new DataToTransfer(sensors.toArray());
+                //convert to JSON
+                String jsonMsg = JsonConverter.objectToJsonString(dataToTransfer);
+                //send to ws-server
+                myWebSocketClient.send(jsonMsg);
                 inclTable.refresh();
                 try {
                     Thread.sleep(1000);
