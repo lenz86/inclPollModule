@@ -1,6 +1,9 @@
 package classes.dao;
 
+
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBConnection {
     private static final String HOST = "localhost";
@@ -10,12 +13,13 @@ public class DBConnection {
     private static final String PASSWORD = "root";
     private static String conn = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME;
     private Connection connection;
+    private static Logger log = Logger.getLogger(DBConnection.class.getName());
 
     public DBConnection() {
         try {
             connection = DriverManager.getConnection(conn, USERNAME, PASSWORD);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
     }
 
@@ -28,7 +32,7 @@ public class DBConnection {
         try {
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
     }
 

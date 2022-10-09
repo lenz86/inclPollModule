@@ -8,8 +8,11 @@ import java.sql.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBWorker {
+    private static Logger log = Logger.getLogger(DBWorker.class.getName());
 
     public static void setValuesIntoDB(Long sensorId, String axisX, String axisY) {
         String query = "INSERT INTO incl_values (sensor_id, axisx, axisy, date)" + "VALUES (?, ?, ?, ?)";
@@ -25,8 +28,9 @@ public class DBWorker {
             prSt.executeUpdate();
             prSt.close();
             dbConnection.close();
+            log.log(Level.INFO, "SET VALUES INTO DB: " + sensorId.toString() + " " + axisX + " " + axisY);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
     }
 
@@ -55,6 +59,7 @@ public class DBWorker {
                     prSt2.setString(4, sensor.getVersion());
                     prSt2.executeUpdate();
                     prSt2.close();
+                    log.log(Level.INFO, "SET SENSOR INTO DB: " + sensor.getFactoryID());
                 }
                 resultSet.first();
             }
@@ -62,7 +67,7 @@ public class DBWorker {
             resultSet.close();
             dbConnection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
     }
 
@@ -79,6 +84,7 @@ public class DBWorker {
                 while (resultSet.next()) {
                     if (resultSet.getString("factory_id").equals(sensor.getFactoryID())) {
                         sensorId.put(resultSet.getLong("id"), sensor.getFactoryID());
+                        log.log(Level.INFO, "GET SENSOR FROM DB: " + sensor.getFactoryID());
                     }
                 }
                 resultSet.first();
@@ -87,7 +93,7 @@ public class DBWorker {
             resultSet.close();
             dbConnection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
         return sensorId;
     }
@@ -103,8 +109,9 @@ public class DBWorker {
             prSt2.executeUpdate();
             prSt1.close();
             prSt2.close();
+            log.log(Level.INFO, "DELETE ALL DATA FROM TABLES IN DB: incl_values, incl");
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
     }
 

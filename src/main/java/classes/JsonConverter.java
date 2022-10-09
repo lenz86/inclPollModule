@@ -4,7 +4,11 @@ package classes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class JsonConverter {
+    private static Logger log = Logger.getLogger(JsonConverter.class.getName());
 
     public static String objectToJsonString(Object pojo) {
         String jsonString = "";
@@ -13,7 +17,7 @@ public class JsonConverter {
         try {
             jsonString = mapper.writeValueAsString(pojo);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
         return jsonString;
     }

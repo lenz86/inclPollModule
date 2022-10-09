@@ -5,6 +5,8 @@ import jssc.SerialPortException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class SensorLineInD7 extends Thread {
@@ -14,6 +16,7 @@ public class SensorLineInD7 extends Thread {
     private static final int[] READ_VALUES_210 = {0x7E, 0x9A, 0x01, 0x01, 0xFE, 0x7E};
     private static final int[] READ_FACTORY_ID = {0x7E, 0x9C, 0x0B, 0x01, 0x96, 0x7E};
     private static final int[] WRITE_NEW_LOG_NUMBER = {0x7E, 0x9C, 0x09, 0x01, 0x01, 0x96, 0x7E};
+    private static Logger log = Logger.getLogger(SensorLineInD7.class.getName());
     private String portName;
     private SerialPort serialPort;
     private int pollingRate;
@@ -31,6 +34,8 @@ public class SensorLineInD7 extends Thread {
         this.endAddress = endAddress;
         this.commandType = commandType;
     }
+
+
 
     @Override
     public void run() {
@@ -64,6 +69,7 @@ public class SensorLineInD7 extends Thread {
                 Thread.sleep(pollingRate);
                 if (portReader.hasData()) {
                     String data = portReader.readData();
+                    log.log(Level.INFO, "GET DATA FROM COM-PORT: " + data);
                     if (data.equals("35")) {
                         sensorScan.offer(String.valueOf(address));
                         sensorList.add(String.valueOf(address));
@@ -71,7 +77,7 @@ public class SensorLineInD7 extends Thread {
                 }
             }
         } catch (SerialPortException | InterruptedException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
     }
 
@@ -97,11 +103,12 @@ public class SensorLineInD7 extends Thread {
             Thread.sleep(pollingRate);
             if (portReader.hasData()) {
                 String data = portReader.readData();
+                log.log(Level.INFO, "GET DATA FROM COM-PORT: " + data);
                 version = PackageHandler.pullVersion(data);                   //Отправлять в парсер пакетов
             }
             serialPort.removeEventListener();
         } catch (SerialPortException | InterruptedException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
         return version;
     }
@@ -117,11 +124,12 @@ public class SensorLineInD7 extends Thread {
             Thread.sleep(pollingRate);
             if (portReader.hasData()) {
                     String data = portReader.readData();
+                log.log(Level.INFO, "GET DATA FROM COM-PORT: " + data);
                 factoryID = PackageHandler.pullFactoryId(data);                    //Отправлять в парсер пакетов
             }
             serialPort.removeEventListener();
         } catch (SerialPortException | InterruptedException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
         return factoryID;
     }
@@ -147,11 +155,12 @@ public class SensorLineInD7 extends Thread {
             }
             if (portReader.hasData()) {
                 String data = portReader.readData();
+                log.log(Level.INFO, "GET DATA FROM COM-PORT: " + data);
                 values = PackageHandler.pullValues(data); //Отправлять в парсер пакетов
             }
             serialPort.removeEventListener();
         } catch (SerialPortException | InterruptedException e) {
-            e.printStackTrace();
+            log.log(Level.WARNING, "EXCEPTION!: ", e);
         }
         return values;
     }
@@ -180,7 +189,7 @@ public class SensorLineInD7 extends Thread {
                 serialPort.openPort();
                 serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
             } catch (SerialPortException e) {
-                e.printStackTrace();
+                log.log(Level.WARNING, "EXCEPTION!: ", e);
             }
         }
     }

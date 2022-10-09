@@ -5,10 +5,13 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PortReader implements SerialPortEventListener {
     private SerialPort serialPort;
     private ConcurrentLinkedQueue<String> data = new ConcurrentLinkedQueue<String>();
+    private static Logger log = Logger.getLogger(PortReader.class.getName());
 
     public PortReader(SerialPort serialPort) {
         this.serialPort = serialPort;
@@ -29,7 +32,7 @@ public class PortReader implements SerialPortEventListener {
                 //Получаем ответ от устройства, обрабатываем данные и т.д.
                 data.offer(serialPort.readHexString(event.getEventValue()));
             } catch (SerialPortException ex) {
-                System.out.println(ex);
+                log.log(Level.WARNING, "EXCEPTION!: ", ex);
             }
         }
 

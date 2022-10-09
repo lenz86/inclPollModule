@@ -18,6 +18,8 @@ import jssc.SerialPortList;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Controller implements Initializable {
 
@@ -68,6 +70,7 @@ public class Controller implements Initializable {
     private SensorPoll sensorPoll;
     private SerialPort serialPort;
     private MyWebSocketClient myWebSocketClient;
+    private static Logger logger = Logger.getLogger(Controller.class.getName());
 
 
     @FXML
@@ -128,7 +131,7 @@ public class Controller implements Initializable {
         try {
             myWebSocketClient = ConnectWS.createClientConnection();
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "UNCHECKED EXCEPTION!: ", e);
         }
         sensorPoll = new SensorPoll();
         sensorPoll.start();
@@ -159,6 +162,13 @@ public class Controller implements Initializable {
 
         @Override
         public void run() {
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    logger.log(Level.WARNING, "UNCHECKED EXCEPTION!: ", e);
+                }
+            });
+
             log.appendText("Search for sensors... \n");
             String port = comBox.getValue();
             int pollingRate = 100;
@@ -172,7 +182,7 @@ public class Controller implements Initializable {
                 try {
                     Thread.sleep(pollingRate);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "Exception: ", e);
                 }
                 if (sensorLine.hasSensor()) {
                     addresses.add(sensorLine.getSensorAddress());
@@ -191,6 +201,13 @@ public class Controller implements Initializable {
 
         @Override
         public void run() {
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    logger.log(Level.WARNING, "UNCHECKED EXCEPTION!: ", e);
+                }
+            });
+
             String port = list1.getSelectionModel().getSelectedItem();
             int pollingRate = 100;
             int pollCount = 0;
@@ -221,7 +238,7 @@ public class Controller implements Initializable {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "Exception: ", e);
                     sensorLine.close();
                     this.interrupt();
                 }
