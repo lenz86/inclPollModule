@@ -1,6 +1,7 @@
 package sample;
 
 import classes.*;
+import classes.dao.DBWorker;
 import classes.websocket.ConnectWS;
 import classes.websocket.DataToTransfer;
 import classes.websocket.MyWebSocketClient;
@@ -12,7 +13,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import jssc.SerialPort;
-import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 import java.net.URL;

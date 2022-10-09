@@ -1,12 +1,7 @@
 package classes.websocket;
 
-import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.util.concurrent.ListenableFuture;
-
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -17,10 +12,11 @@ public class ConnectWS {
     private static String port;
     private static MyWebSocketClient client;
 
-    public ConnectWS() {
+    private ConnectWS() {
 
     }
 
+    /*Create web-socket client and read properties from file*/
     public static MyWebSocketClient createClientConnection() throws ExecutionException, InterruptedException {
         properties = readProperties();
         server = properties.getProperty("server");
@@ -30,7 +26,7 @@ public class ConnectWS {
         return client;
     }
 
-
+    /*Read settings for web-socket connection from .properties*/
     private static Properties readProperties() {
         //get resource folder
         String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();

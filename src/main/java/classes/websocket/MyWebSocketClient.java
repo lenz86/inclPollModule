@@ -20,10 +20,14 @@ public class MyWebSocketClient {
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
     private StompSession stompSession;
 
+
+    /*Connect to web-socket server*/
     public void connect(String server, String port) {
 
+        //web-socket server URL mask
         String url = "ws://{host}:{port}/wshost";
 
+        //config web-socket and sockJS
         Transport webSocketTransport = new WebSocketTransport(new StandardWebSocketClient());
         List<Transport> transports = Collections.singletonList(webSocketTransport);
 
@@ -32,20 +36,22 @@ public class MyWebSocketClient {
 
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
 
+        //try to connect and get session
         ListenableFuture<StompSession> future = stompClient.connect(url, headers, new MyHandler(), server, port);
         try {
             stompSession = future.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
+
+    /*Send message to web-socket server*/
     public void send(String jsonMsg) {
         stompSession.send("/app/chat.send", jsonMsg.getBytes());
     }
 
+    /*After-connect logic*/
     private class MyHandler extends StompSessionHandlerAdapter {
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
             System.out.println("Now connected");

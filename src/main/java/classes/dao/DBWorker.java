@@ -1,5 +1,8 @@
-package classes;
+package classes.dao;
 
+
+import classes.Incl;
+import classes.dao.DBConnection;
 
 import java.sql.*;
 

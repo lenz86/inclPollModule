@@ -12,33 +12,72 @@
     <groupId>com.inclin</groupId>
     <artifactId>inclin</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <!-- Plugin for building single JAR-file with dependencies (go into maven and click "package") -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        sample.Main
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.scream3r/jssc -->
+
+        <!-- JSSC LIBRARIES - FOR WORKING WITH COM-PORTS -->
         <dependency>
             <groupId>org.scream3r</groupId>
             <artifactId>jssc</artifactId>
             <version>2.8.0</version>
         </dependency>
+        <!-- ========================================== -->
 
-        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+
+        <!-- APACHE CODECS - FOR WORKING WITH HEX-VARIABLES -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.15</version>
         </dependency>
+        <!-- ========================================== -->
 
-        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+
+        <!-- MY SQL DRIVER -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.28</version>
         </dependency>
+        <!-- ========================================== -->
 
 
         <!-- SPRING BOOT WEB SOCKET -->
@@ -59,18 +98,6 @@
             <scope>test</scope>
         </dependency>
         <!-- ========================================== -->
-
-
-        <!-- JACKSON - FOR WORKING WITH JSON -->
-        <!-- ========================================== -->
-<!--        <dependency>-->
-<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--            <artifactId>jackson-databind</artifactId>-->
-<!--            <version>2.13.4</version>-->
-<!--        </dependency>-->
-        <!-- ========================================== -->
-
-
 
     </dependencies>
 

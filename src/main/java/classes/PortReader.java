@@ -4,8 +4,6 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
-
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PortReader implements SerialPortEventListener {

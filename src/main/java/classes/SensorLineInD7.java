@@ -1,15 +1,9 @@
 package classes;
 
-import classes.PackageHandler;
-import classes.PortReader;
-import classes.ProtocolVersion;
-import classes.SensorList;
 import jssc.SerialPort;
 import jssc.SerialPortException;
-
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 

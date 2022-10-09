@@ -3,7 +3,6 @@ package classes;
 
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class SensorList {
     private String portName;

@@ -2,6 +2,7 @@ package classes;
 
 import java.util.Objects;
 
+/*IN-D7 Sensor*/
 public class Incl {
     private String axisX;
     private String axisY;
