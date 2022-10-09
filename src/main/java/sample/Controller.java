@@ -95,7 +95,7 @@ public class Controller implements Initializable {
     void selectedItem(MouseEvent event) {
         if (inclTable.getItems().isEmpty()) {
             String port = list1.getSelectionModel().getSelectedItem();
-            int pollingRate = 1000;
+            int pollingRate = 100;
             SerialPort serialPort = new SerialPort(port);
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
             sensorLine.open();

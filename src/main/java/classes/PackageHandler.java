@@ -48,7 +48,7 @@ public class PackageHandler {
 
     public static String[] pullValues(String data) {
         String[] values = new String[2];
-        if (data.startsWith("7E") && data.endsWith("7E")) {
+        if (data.startsWith("7E") && data.endsWith("7E") && data.length() > 5) {
             String[] bytes = data.split(" ");
             StringBuilder tmp = new StringBuilder("");
             StringBuilder axisX = new StringBuilder("");
@@ -69,6 +69,7 @@ public class PackageHandler {
                 }
                 tmp.setLength(0);
             }
+
             if (binaryBytes.get(0).substring(0, 1).equals("1")) {
                 axisY.append("-");
             }
@@ -87,6 +88,7 @@ public class PackageHandler {
         }
         return values;
     }
+
 
     //конвертирует 1 байт hex-формата String типа в byte
     private static byte fromHex(String s) {
