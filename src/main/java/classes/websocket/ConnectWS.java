@@ -1,7 +1,10 @@
 package classes.websocket;
 
+import sample.Main;
+
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -28,13 +31,11 @@ public class ConnectWS {
 
     /*Read settings for web-socket connection from .properties*/
     private static Properties readProperties() {
-        //get resource folder
-        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-        //create app.properties path (/resource/app.properties)
-        String appConfigPath = rootPath + "app.properties";
+        //get app.properties as Stream
+        InputStream stream = Main.class.getResourceAsStream("/app.properties");
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(appConfigPath));
+            properties.load(stream);
         } catch (IOException e) {
             e.printStackTrace();
         }
