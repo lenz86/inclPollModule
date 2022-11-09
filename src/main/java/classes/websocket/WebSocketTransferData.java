@@ -3,11 +3,11 @@ package classes.websocket;
 import java.time.LocalDateTime;
 
 /*POJO for transfer data to web-socket server as JSON*/
-public class DataToTransfer {
+public class WebSocketTransferData {
     private LocalDateTime regTime;
     private Object[] data;
 
-    public DataToTransfer(Object[] data) {
+    public WebSocketTransferData(Object[] data) {
         this.regTime = LocalDateTime.now();
         this.data = data;
     }

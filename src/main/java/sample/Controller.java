@@ -2,8 +2,12 @@ package sample;
 
 import classes.*;
 import classes.dao.DBWorker;
+import classes.restclient.Communication;
+import classes.restclient.RestMessageSender;
+import classes.restclient.RestTransferData;
+import classes.restclient.entity.InclinometrValue;
 import classes.websocket.ConnectWS;
-import classes.websocket.DataToTransfer;
+import classes.websocket.WebSocketTransferData;
 import classes.websocket.MyWebSocketClient;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,8 +18,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import jssc.SerialPort;
 import jssc.SerialPortList;
+import org.springframework.context.ApplicationContext;
 
 import java.net.URL;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -62,6 +69,7 @@ public class Controller implements Initializable {
     @FXML
     private ProgressBar progBar;
 
+    private ApplicationContext context;
     private ObservableList<String> portsBox = FXCollections.observableArrayList();
     private ObservableList<Incl> sensors = FXCollections.observableArrayList();
     private HashSet<SensorList> comPorts = new HashSet<>();
@@ -209,6 +217,7 @@ public class Controller implements Initializable {
             });
 
             String port = list1.getSelectionModel().getSelectedItem();
+            RestMessageSender restMessageSender = new RestMessageSender(context.getBean("communication", Communication.class));
             int pollingRate = 100;
             int pollCount = 0;
             SensorLineInD7 sensorLine = new SensorLineInD7(serialPort, pollingRate, 1, 64, 1);
@@ -218,9 +227,15 @@ public class Controller implements Initializable {
                     String[] tmp = sensorLine.readValues(ProtocolVersion.VERSION_2_11, Integer.parseInt(sensor.getAddress()));
                     sensor.setAxisX(tmp[0]);
                     sensor.setAxisY(tmp[1]);
-                    //Write into DB every 10th poll
+                    //Write into DB and send data to server every 10th poll
                     if (pollCount == 10) {
-                        DBWorker.setValuesIntoDB(sensor.getIdFromDB(), sensor.getAxisX(), sensor.getAxisY());
+                        String axisX = sensor.getAxisX();
+                        String axisY = sensor.getAxisY();
+                        Integer factoryId = Integer.parseInt(sensor.getFactoryID());
+                        DBWorker.setValuesIntoDB(sensor.getIdFromDB(), axisX, axisY);
+                        InclinometrValue inclinometrValue = new InclinometrValue(axisX, axisY, factoryId);
+                        RestTransferData restTransferData = new RestTransferData(inclinometrValue);
+                        restMessageSender.sendData(restTransferData);
                     }
                 }
                 if (pollCount < 10) {
@@ -229,9 +244,9 @@ public class Controller implements Initializable {
                     pollCount = 0;
                 }
                 //Create data-object from 'sensors' array with current values
-                DataToTransfer dataToTransfer = new DataToTransfer(sensors.toArray());
+                WebSocketTransferData webSocketTransferData = new WebSocketTransferData(sensors.toArray());
                 //convert to JSON
-                String jsonMsg = JsonConverter.objectToJsonString(dataToTransfer);
+                String jsonMsg = JsonConverter.objectToJsonString(webSocketTransferData);
                 //send to ws-server
                 myWebSocketClient.send(jsonMsg);
                 inclTable.refresh();
@@ -247,4 +262,7 @@ public class Controller implements Initializable {
         }
     }
 
+    public void setContext(ApplicationContext context) {
+        this.context = context;
+    }
 }

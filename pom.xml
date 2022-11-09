@@ -99,6 +99,15 @@
         </dependency>
         <!-- ========================================== -->
 
+        <!-- SPRING BOOT WEB MVC - FOR REST CLIENT -->
+        <!-- ========================================== -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>5.3.23</version>
+        </dependency>
+        <!-- ========================================== -->
+
     </dependencies>
 
 </project>
